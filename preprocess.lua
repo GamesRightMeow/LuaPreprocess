@@ -4,8 +4,7 @@
 --=  by Marcus 'ReFreezed' Thunström
 --=
 --=  License: MIT (see the bottom of this file)
---=  Website: http://refreezed.com/luapreprocess/
---=  Documentation: http://refreezed.com/luapreprocess/docs/
+--=  Documentation: https://github.com/GamesRightMeow/LuaPreprocess/
 --=
 --=  Tested with Lua 5.1, 5.2, 5.3, 5.4 and LuaJIT.
 --=
@@ -69,7 +68,7 @@
 	local font = !!(isDeveloper and "loadDevFont()" or "loadUserFont()")
 
 	-- See the full documentation for additional features (like macros):
-	-- http://refreezed.com/luapreprocess/docs/extra-functionality/
+	-- https://github.com/GamesRightMeow/LuaPreprocess/blob/master/docs/extra-functionality.md
 
 ----------------------------------------------------------------
 
@@ -126,7 +125,7 @@
 	!func()
 
 	-- For the full documentation, see:
-	-- http://refreezed.com/luapreprocess/docs/
+	-- https://github.com/GamesRightMeow/LuaPreprocess
 
 --============================================================]]
 

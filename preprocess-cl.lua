@@ -10,8 +10,7 @@ exec lua "$0" "$@"
 --=  Requires preprocess.lua to be in the same folder!
 --=
 --=  License: MIT (see the bottom of this file)
---=  Website: http://refreezed.com/luapreprocess/
---=  Documentation: http://refreezed.com/luapreprocess/docs/command-line/
+--=  Documentation: https://github.com/GamesRightMeow/LuaPreprocess/blob/master/docs/command-line.md
 --=
 --=  Tested with Lua 5.1, 5.2, 5.3, 5.4 and LuaJIT.
 --=

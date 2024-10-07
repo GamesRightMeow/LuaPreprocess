@@ -1,14 +1,5 @@
 <h1 align="center"><img src="misc/logo.png" width="600" height="126" alt="LuaPreprocess" title="LuaPreprocess"></h1>
 
-<p align="center">
-	<a href="https://github.com/ReFreezed/LuaPreprocess/releases/latest">
-		<img src="https://img.shields.io/github/release/ReFreezed/LuaPreprocess.svg" alt="">
-	</a>
-	<a href="https://github.com/ReFreezed/LuaPreprocess/blob/master/LICENSE.txt">
-		<img src="https://img.shields.io/github/license/ReFreezed/LuaPreprocess.svg" alt="">
-	</a>
-</p>
-
 **LuaPreprocess** - a small and straightforward Lua preprocessor featuring a simple syntax.
 Write embedded metaprograms to generate code using normal Lua inside your Lua files.
 
@@ -21,7 +12,7 @@ A separate [command line program](preprocess-cl.lua) is available too.
 - [Usage](#usage)
 	- [Library](#preprocess-files-using-the-library)
 	- [Command Line](#preprocess-files-from-the-command-line)
-- [Documentation](http://refreezed.com/luapreprocess/docs/)
+- [Documentation](docs/)
 - [Help](#help)
 
 
@@ -29,7 +20,7 @@ A separate [command line program](preprocess-cl.lua) is available too.
 ## Example Program
 
 The exclamation mark (`!`) is used to indicate what code is part of the metaprogram.
-([See screenshot of processing steps with highlighting](https://raw.githubusercontent.com/ReFreezed/LuaPreprocess/master/misc/processingSteps.png))
+([See screenshot of processing steps with highlighting](https://github.com/GamesRightMeow/LuaPreprocess/blob/master/misc/processingSteps.png))
 
 ```lua
 -- Normal Lua.
@@ -138,7 +129,7 @@ end
 print("Lines of code processed: "..info.lineCount)
 ```
 
-See the [website](http://refreezed.com/luapreprocess/docs/)
+See the [docs](docs/)
 or the top of [preprocess.lua](preprocess.lua) for documentation.
 
 
@@ -162,7 +153,7 @@ lua preprocess-cl.lua --outputpaths [options] inputpath1 outputpath1 [inputpath2
 
 If a filepath is, for example, `C:/MyApp/app.lua2p` then LuaPreprocess will write the processed file to `C:/MyApp/app.lua`.
 
-See the [website](http://refreezed.com/luapreprocess/docs/command-line/),
+See the [docs](docs/),
 or the top of [preprocess-cl.lua](preprocess-cl.lua)
 and [preprocess.lua](preprocess.lua), for the options and more documentation.
 
@@ -170,7 +161,7 @@ and [preprocess.lua](preprocess.lua), for the options and more documentation.
 
 ## Documentation
 
-- [Website](http://refreezed.com/luapreprocess/docs/)
+- [Docs](docs/)
 - Library: See the top of [preprocess.lua](preprocess.lua)
 - Command line: See the top of [preprocess-cl.lua](preprocess-cl.lua)
 
@@ -179,10 +170,8 @@ and [preprocess.lua](preprocess.lua), for the options and more documentation.
 ## Help
 
 Got a question?
-If the [documentation](http://refreezed.com/luapreprocess/docs/) doesn't have the answer,
-look if someone has asked the question in the [issue tracker](https://github.com/ReFreezed/LuaPreprocess/issues?q=is%3Aissue),
-or [create a new issue](https://github.com/ReFreezed/LuaPreprocess/issues/new).
-
-Also check out the online [syntax highlighter](http://refreezed.com/luapreprocess/highlight/) tool to help visualize errors in code.
+If the [documentation](docs/) doesn't have the answer,
+look if someone has asked the question in the [issue tracker](https://github.com/GamesRightMeow/LuaPreprocess/issues),
+or [create a new issue](https://github.com/GamesRightMeow/LuaPreprocess/issues/new).
 
 
