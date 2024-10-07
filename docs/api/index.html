@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta content="width=device-width, initial-scale=1" name="viewport">
+		<meta content="LuaWebGen 1.5.0" name="generator">
+
+		<meta content="Official website for LuaPreprocess - the small and straightforward Lua preprocessor with simple syntax." name="description">
+
+		<meta content="website" name="og:type">
+		<meta content="API - Documentation - LuaPreprocess" name="og:title">
+		<meta content="Official website for LuaPreprocess - the small and straightforward Lua preprocessor with simple syntax." name="og:description">
+
+		<meta content="http://refreezed.com/luapreprocess/logo.png" name="og:image">
+
+		<meta content="http://refreezed.com/luapreprocess/docs/api/" name="og:url">
+		<meta content="en_US" name="og:locale">
+		<meta content="LuaPreprocess" name="og:site_name">
+
+		<title>API - Documentation - LuaPreprocess</title>
+
+		<link href="http://refreezed.com/luapreprocess/docs/api/" rel="canonical">
+		<link href="/style.css" rel="stylesheet">
+		<link href="/luapreprocess/favicon.ico" rel="shortcut icon" type="image/x-icon">
+
+		<script src="/main.js"></script>
+	</head>
+
+	<body data-site="luapreprocess">
+		<header>
+
+				<div id="home">
+					<a href="/">« ReFreezed.com</a>
+				</div>
+
+			<a class="siteFront" href="/luapreprocess/"><img alt="LuaPreprocess" class="limitSize" height="126" src="/luapreprocess/logo.png" width="600"></a>
+		</header>
+
+		<nav id="main-navigation">
+
+				<ul>
+
+							<li><a href="/luapreprocess/">About</a></li>
+
+							<li><a href="https://github.com/ReFreezed/LuaPreprocess/releases/latest">Download</a></li>
+
+							<li><a href="/luapreprocess/docs/"><strong>Documentation</strong></a></li>
+
+							<li><a href="/luapreprocess/highlight/">Highlighter</a></li>
+
+							<li><a href="https://github.com/ReFreezed/LuaPreprocess/issues">Issue Tracker</a></li>
+
+							<li><a href="https://github.com/ReFreezed/LuaPreprocess">Source</a></li>
+
+				</ul>
+
+		</nav>
+
+		<div class="middleOuter"><div class="middleInner">
+
+	<nav id="sidebar"><div>
+		<input id="hideTopics" role="button" style="display:none;" type="checkbox">
+		<script>{
+			let checkbox     = document.getElementById("hideTopics");
+			checkbox.checked = (localStorageGet("docs_topicsHidden") === "1");
+
+			checkbox.addEventListener("change", function(e) {
+				if (checkbox.checked)  localStorageSet("docs_topicsHidden", "1");
+				else                   localStorageRemove("docs_topicsHidden");
+			});
+		}</script>
+
+		<div class="title">
+			<h1>Topics</h1>
+			<span class="hideTopics"><label for="hideTopics"></label></span>
+		</div>
+
+		<ul class="topics">
+			<li><a href="/luapreprocess/docs/">Home</a><ul><li><a href="/luapreprocess/docs/#how-to-metaprogram">How to metaprogram</a></li><li><a href="/luapreprocess/docs/#two-ways-of-generating-code">Two ways of generating code</a></li><li><a href="/luapreprocess/docs/#potential-gotchas">Potential gotchas</a></li></ul></li><li><strong>API</strong></li><li><a href="/luapreprocess/docs/command-line/">Command line</a><ul><li><a href="/luapreprocess/docs/command-line/#command-line-usage">Command line usage</a></li><li><a href="/luapreprocess/docs/command-line/#options">Options</a></li><li><a href="/luapreprocess/docs/command-line/#message-handlers">Message handlers</a></li><li><a href="/luapreprocess/docs/command-line/#messages">Messages</a></li><li><a href="/luapreprocess/docs/command-line/#other-info">Other info</a></li></ul></li><li><a href="/luapreprocess/docs/extra-functionality/">Extra functionality</a><ul><li><a href="/luapreprocess/docs/extra-functionality/#preprocessor-keywords">Preprocessor keywords</a></li><li><a href="/luapreprocess/docs/extra-functionality/#preprocessor-symbols">Preprocessor symbols</a></li><li><a href="/luapreprocess/docs/extra-functionality/#backtick-strings">Backtick strings</a></li></ul></li>
+		</ul>
+	</div></nav>
+
+<main>
+
+		<h1>API</h1>
+
+	<p>There are two general contexts where code run:</p>
+<ul>
+<li><strong>Build system:</strong> The place you call <a href="#processfile"><code>processFile</code></a>/<a href="#processstring"><code>processString</code></a> from.</li>
+<li><strong>Metaprogram:</strong> The file/Lua string being processed. (All examples on this page are in this context, unless noted otherwise.)</li>
+</ul>
+<p>All global functions that are available to metaprograms are also available to the build system through the library:</p>
+<pre class="syntax-lua"><code><span class="c">-- Build system context:
+</span><span class="k">local</span> pp = require(<span class="s">&quot;preprocess&quot;</span>) <span class="c">-- Examples on this page assume the library has been required into `pp`.
+</span><span class="k">local</span> luaString = pp.toLua(<span class="s">&quot;foo&quot;</span>)
+
+<span class="c">-- Metaprogram context:
+</span><span class="p"><span class="d">!</span><span class="k">local</span> luaString = toLua(<span class="s">&quot;foo&quot;</span>)</span>
+</code></pre>
+<p><strong>Global functions in metaprograms:</strong></p>
+<ul>
+<li><a href="#comparenatural">compareNatural</a></li>
+<li><a href="#concattokens">concatTokens</a></li>
+<li><a href="#copytable">copyTable</a></li>
+<li><a href="#eachtoken">eachToken</a></li>
+<li><a href="#escapepattern">escapePattern</a></li>
+<li><a href="#evaluate">evaluate</a></li>
+<li><a href="#fileexists">fileExists</a></li>
+<li><a href="#getfilecontents">getFileContents</a> <em>(deprecated)</em></li>
+<li><a href="#getindentation">getIndentation</a></li>
+<li><a href="#getnextusefultoken">getNextUsefulToken</a></li>
+<li><a href="#isprocessing">isProcessing</a></li>
+<li><a href="#istoken">isToken</a></li>
+<li><a href="#newtoken">newToken</a></li>
+<li><a href="#pack">pack</a></li>
+<li><a href="#pairssorted">pairsSorted</a></li>
+<li><a href="#printf">printf</a></li>
+<li><a href="#readfile">readFile</a></li>
+<li><a href="#removeuselesstokens">removeUselessTokens</a></li>
+<li><a href="#run">run</a></li>
+<li><a href="#serialize">serialize</a></li>
+<li><a href="#sortnatural">sortNatural</a></li>
+<li><a href="#tokenize">tokenize</a></li>
+<li><a href="#tolua">toLua</a></li>
+<li><a href="#unpack">unpack</a></li>
+<li><a href="#writefile">writeFile</a></li>
+</ul>
+<p><strong>Only during processing:</strong></p>
+<ul>
+<li><a href="#callmacro">callMacro</a></li>
+<li><a href="#getcurrentindentationinoutput">getCurrentIndentationInOutput</a></li>
+<li><a href="#getcurrentlinenumberinoutput">getCurrentLineNumberInOutput</a></li>
+<li><a href="#getcurrentpathin">getCurrentPathIn</a></li>
+<li><a href="#getcurrentpathout">getCurrentPathOut</a></li>
+<li><a href="#getoutputsizesofar">getOutputSizeSoFar</a></li>
+<li><a href="#getoutputsofar">getOutputSoFar</a></li>
+<li><a href="#getoutputsofaronline">getOutputSoFarOnLine</a></li>
+<li><a href="#loadresource">loadResource</a></li>
+<li><a href="#outputlua">outputLua</a></li>
+<li><a href="#outputluatemplate">outputLuaTemplate</a></li>
+<li><a href="#outputvalue">outputValue</a></li>
+<li><a href="#startinterceptingoutput">startInterceptingOutput</a></li>
+<li><a href="#stopinterceptingoutput">stopInterceptingOutput</a></li>
+</ul>
+<p><strong>Macros:</strong></p>
+<ul>
+<li><a href="#assert">ASSERT</a> <em>(macro)</em></li>
+<li><a href="#log">LOG</a> <em>(macro)</em></li>
+</ul>
+<p><strong>Exported stuff from the library:</strong></p>
+<ul>
+<li>(all the functions above)</li>
+<li><a href="#version">VERSION</a></li>
+<li><a href="#metaenvironment">metaEnvironment</a></li>
+<li><a href="#processfile">processFile</a></li>
+<li><a href="#processstring">processString</a></li>
+</ul>
+<hr>
+<h2 id="global-functions-in-metaprograms">Global functions in metaprograms<a aria-hidden="true" class="anchor" href="#global-functions-in-metaprograms"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h2>
+<h3 id="comparenatural">compareNatural<a aria-hidden="true" class="anchor" href="#comparenatural"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>aIsLessThanB = compareNatural( a, b )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.18">v1.18</small>
+Compare two strings.
+Numbers in the strings are compared as numbers (as opposed to as strings).</p>
+<pre class="syntax-lua"><code>print(               <span class="s">&quot;foo9&quot;</span> &lt; <span class="s">&quot;foo10&quot;</span> ) <span class="c">-- false
+</span>print(compareNatural(<span class="s">&quot;foo9&quot;</span>,  <span class="s">&quot;foo10&quot;</span>)) <span class="c">-- true
+</span></code></pre>
+<div class="paragraph seeAlso">See also: <a href="#sortnatural">sortNatural</a></div>
+<h3 id="concattokens">concatTokens<a aria-hidden="true" class="anchor" href="#concattokens"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>luaString = concatTokens( tokens )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.3">v1.3</small>
+Concatenate tokens by their representations.</p>
+<pre class="syntax-lua"><code><span class="k">local</span> tokens = {}
+
+table.insert(tokens, newToken(<span class="s">&quot;identifier&quot;</span>,  <span class="s">&quot;foo&quot;</span>))
+table.insert(tokens, newToken(<span class="s">&quot;punctuation&quot;</span>, <span class="s">&quot;=&quot;</span>))
+table.insert(tokens, newToken(<span class="s">&quot;string&quot;</span>,      <span class="s">&quot;bar&quot;</span>))
+
+<span class="k">local</span> luaString = concatTokens(tokens) <span class="c">-- foo=&quot;bar&quot;
+</span></code></pre>
+<h3 id="copytable">copyTable<a aria-hidden="true" class="anchor" href="#copytable"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>copy = copyTable( table [, deep=<span class="n">false</span> ] )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.8">v1.8</small>
+Copy a table, optionally recursively (deep copy).
+Multiple references to the same table and self-references are preserved during deep copying.</p>
+<pre class="syntax-lua"><code><span class="k">local</span> t = {}
+t[<span class="n">1</span>]    = {s=<span class="s">&quot;foo&quot;</span>}
+t.self  = t
+
+<span class="k">local</span> copy = copyTable(t, <span class="n">true</span>)
+assert(copy[<span class="n">1</span>].s == <span class="s">&quot;foo&quot;</span>)
+assert(copy.self == copy)
+</code></pre>
+<h3 id="eachtoken">eachToken<a aria-hidden="true" class="anchor" href="#eachtoken"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code><span class="k">for</span> index, token <span class="k">in</span> eachToken( tokens [, ignoreUselessTokens=<span class="n">false</span> ] ) <span class="k">do</span>
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.6">v1.6</small>
+Loop through tokens.</p>
+<h3 id="escapepattern">escapePattern<a aria-hidden="true" class="anchor" href="#escapepattern"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>escapedString = escapePattern( string )
+</code></pre>
+</div>
+<p>Escape a string so it can be used in a pattern as plain text.</p>
+<pre class="syntax-lua"><code><span class="k">local</span> s = <span class="s">&quot;2*5=10&quot;</span>
+print(s:match(<span class="s">&quot;2*5&quot;</span>))                <span class="c">-- Matches &quot;5&quot;
+</span>print(s:match(escapePattern(<span class="s">&quot;2*5&quot;</span>))) <span class="c">-- Matches &quot;2*5&quot;
+</span></code></pre>
+<h3 id="evaluate">evaluate<a aria-hidden="true" class="anchor" href="#evaluate"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>value = evaluate( expression )
+value = evaluate( expression [, environment=getfenv() ] ) <span class="c">-- v1.19
+</span></code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.18">v1.18</small>
+Evaluate a Lua expression.
+The function is kind of the opposite of <a href="#tolua"><code>toLua</code></a>.
+Returns <strong>nil</strong> and a message on error.</p>
+<p>Similar to calling <code>loadstring(&quot;return &quot;..expression)()</code>.</p>
+<blockquote>
+<p><strong>Note:</strong> <strong>nil</strong> or <strong>false</strong> can also be returned as the first value if that&apos;s the value the expression results in!</p>
+</blockquote>
+<pre class="syntax-lua"><code><span class="p"><span class="d">!</span>(
+print(evaluate(<span class="s">&quot;1+2&quot;</span>)) <span class="c">-- 3
+</span>
+<span class="k">local</span> <span class="k">function</span> SCREAM(messageCode)
+	<span class="k">local</span> message = evaluate(messageCode):upper() .. <span class="s">&quot;!!!&quot;</span>
+	<span class="k">return</span> <span class="s">&quot;print(&quot;</span> .. toLua(message) .. <span class="s">&quot;)&quot;</span>
+<span class="k">end</span>
+)</span>
+
+<span class="k">@@</span><span class="p">SCREAM</span>(<span class="s">&quot;Hello&quot;</span>)
+
+<span class="c">-- Output:
+</span>print(<span class="s">&quot;HELLO!!!&quot;</span>)
+</code></pre>
+<h3 id="fileexists">fileExists<a aria-hidden="true" class="anchor" href="#fileexists"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>bool = fileExists( path )
+</code></pre>
+</div>
+<p>Check if a file exists (using <a href="https://www.lua.org/manual/5.1/manual.html#pdf-io.open"><code>io.open</code></a>).</p>
+<h3 id="getfilecontents">getFileContents<a aria-hidden="true" class="anchor" href="#getfilecontents"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<p><small class="tag tag-versionRemoved" title="Deprecated in version 1.19">v1.19</small>
+Alias for <a href="#readfile"><code>readFile</code></a>.</p>
+<h3 id="getindentation">getIndentation<a aria-hidden="true" class="anchor" href="#getindentation"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>string = getIndentation( line )
+size   = getIndentation( line, tabWidth )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.19">v1.19</small>
+Get indentation of a line, either as a string or as a size in spaces.</p>
+<h3 id="getnextusefultoken">getNextUsefulToken<a aria-hidden="true" class="anchor" href="#getnextusefultoken"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>token, index = getNextUsefulToken( tokens, startIndex [, steps=<span class="n">1</span> ] )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.7">v1.7</small>
+Get the next token that isn&apos;t a whitespace or comment.
+Returns <strong>nil</strong> if no more tokens are found.
+Specify a negative steps value to get an earlier token.</p>
+<h3 id="isprocessing">isProcessing<a aria-hidden="true" class="anchor" href="#isprocessing"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>bool = isProcessing( )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.21">v1.21</small>
+Returns <strong>true</strong> if a file or string is currently being <a href="#processfile">processed</a>.</p>
+<h3 id="istoken">isToken<a aria-hidden="true" class="anchor" href="#istoken"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>bool = isToken( token, tokenType [, tokenValue=any ] )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.6">v1.6</small>
+Check if a token is of a specific type, optionally also check it&apos;s value.</p>
+<pre class="syntax-lua"><code><span class="k">local</span> tokens = tokenize(<span class="s">&quot;local foo = 123&quot;</span>)
+<span class="k">local</span> token1 = tokens[<span class="n">1</span>]
+
+<span class="k">if</span> token1 <span class="l">and</span> isToken(token1, <span class="s">&quot;keyword&quot;</span>, <span class="s">&quot;if&quot;</span>) <span class="k">then</span>
+	print(<span class="s">&quot;We got an if statement.&quot;</span>)
+<span class="k">end</span>
+</code></pre>
+<h3 id="newtoken">newToken<a aria-hidden="true" class="anchor" href="#newtoken"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>token = newToken( tokenType, <span class="n">...</span> )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.1">v1.1</small>
+Create a new token.
+Different token types take different arguments.</p>
+<pre class="syntax-lua"><code>commentToken     = newToken( <span class="s">&quot;comment&quot;</span>,     contents [, forceLongForm=<span class="n">false</span> ] )
+identifierToken  = newToken( <span class="s">&quot;identifier&quot;</span>,  identifier )
+keywordToken     = newToken( <span class="s">&quot;keyword&quot;</span>,     keyword )
+numberToken      = newToken( <span class="s">&quot;number&quot;</span>,      number [, numberFormat=<span class="s">&quot;auto&quot;</span> ] )
+punctuationToken = newToken( <span class="s">&quot;punctuation&quot;</span>, symbol )
+stringToken      = newToken( <span class="s">&quot;string&quot;</span>,      contents [, longForm=<span class="n">false</span> ] )
+whitespaceToken  = newToken( <span class="s">&quot;whitespace&quot;</span>,  contents )
+ppEntryToken     = newToken( <span class="s">&quot;pp_entry&quot;</span>,    isDouble )
+ppKeywordToken   = newToken( <span class="s">&quot;pp_keyword&quot;</span>,  ppKeyword ) <span class="c">-- ppKeyword can be &quot;file&quot;, &quot;insert&quot;, &quot;line&quot; or &quot;@&quot;.
+</span>ppSymbolToken    = newToken( <span class="s">&quot;pp_symbol&quot;</span>,   identifier )
+</code></pre>
+<pre class="syntax-lua"><code>commentToken     = { type=<span class="s">&quot;comment&quot;</span>,     representation=string, value=string, long=isLongForm }
+identifierToken  = { type=<span class="s">&quot;identifier&quot;</span>,  representation=string, value=string }
+keywordToken     = { type=<span class="s">&quot;keyword&quot;</span>,     representation=string, value=string }
+numberToken      = { type=<span class="s">&quot;number&quot;</span>,      representation=string, value=number }
+punctuationToken = { type=<span class="s">&quot;punctuation&quot;</span>, representation=string, value=string }
+stringToken      = { type=<span class="s">&quot;string&quot;</span>,      representation=string, value=string, long=isLongForm }
+whitespaceToken  = { type=<span class="s">&quot;whitespace&quot;</span>,  representation=string, value=string }
+ppEntryToken     = { type=<span class="s">&quot;pp_entry&quot;</span>,    representation=string, value=string, double=isDouble }
+ppKeywordToken   = { type=<span class="s">&quot;pp_keyword&quot;</span>,  representation=string, value=string }
+ppSymbolToken    = { type=<span class="s">&quot;pp_symbol&quot;</span>,   representation=string, value=string }
+</code></pre>
+<h4 id="number-formats">Number formats<a aria-hidden="true" class="anchor" href="#number-formats"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h4>
+<ul>
+<li>
+<code>&quot;int&quot;</code> or <code>&quot;integer&quot;</code>      (e.g. <code>42</code>)</li>
+<li>
+<code>&quot;float&quot;</code>                   (e.g. <code>3.14</code>)</li>
+<li>
+<code>&quot;e&quot;</code>   or <code>&quot;scientific&quot;</code>   (e.g. <code>0.7e+12</code>)</li>
+<li>
+<code>&quot;E&quot;</code>   or <code>&quot;SCIENTIFIC&quot;</code>   (e.g. <code>0.7E+12</code> (upper case))</li>
+<li>
+<code>&quot;hex&quot;</code> or <code>&quot;hexadecimal&quot;</code>  (e.g. <code>0x19af</code>)</li>
+<li>
+<code>&quot;HEX&quot;</code> or <code>&quot;HEXADECIMAL&quot;</code>  (e.g. <code>0x19AF</code> (upper case))</li>
+<li>
+<code>&quot;auto&quot;</code></li>
+</ul>
+<blockquote>
+<p><strong>Note:</strong> Infinite numbers and <strong>NaN</strong> always get automatic format:</p>
+<ul>
+<li>+Infinity: <code>(1/0)</code></li>
+<li>-Infinity: <code>(-1/0)</code></li>
+<li>NaN: <code>(0/0)</code></li>
+</ul>
+</blockquote>
+<h3 id="pack">pack<a aria-hidden="true" class="anchor" href="#pack"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>values = pack( value1, <span class="n">...</span> )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.8">v1.8</small>
+Put values in a new array.
+<code>values.n</code> is the amount of values (which can be zero) including any <strong>nil</strong> values.
+Alias for <a href="https://www.lua.org/manual/5.2/manual.html#pdf-table.pack"><code>table.pack</code></a> in Lua 5.2+.</p>
+<pre class="syntax-lua"><code><span class="k">local</span> <span class="k">function</span> getValues()
+	<span class="k">return</span> <span class="n">99</span>, <span class="n">nil</span>, <span class="s">&quot;hello&quot;</span>
+<span class="k">end</span>
+
+<span class="k">local</span> values = pack(getValues())
+
+print(#values)  <span class="c">-- Either 3 or 1 depending on interpreter implementation details. Unreliable!
+</span>print(values.n) <span class="c">-- 3
+</span>
+print(unpack(values, <span class="n">1</span>, values.n)) <span class="c">-- 99, nil, &quot;hello&quot;
+</span></code></pre>
+<h3 id="pairssorted">pairsSorted<a aria-hidden="true" class="anchor" href="#pairssorted"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code><span class="k">for</span> key, value <span class="k">in</span> pairsSorted( table ) <span class="k">do</span>
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.18">v1.18</small>
+Same as <a href="https://www.lua.org/manual/5.1/manual.html#pdf-pairs"><code>pairs</code></a> but the keys are sorted (ascending).</p>
+<h3 id="printf">printf<a aria-hidden="true" class="anchor" href="#printf"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>printf( formatString, value1, <span class="n">...</span> )
+</code></pre>
+</div>
+<p>Print a formatted string.
+Same as <code>print(formatString:format(value1, ...))</code>.</p>
+<h3 id="readfile">readFile<a aria-hidden="true" class="anchor" href="#readfile"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>contents = readFile( path [, isTextFile=<span class="n">false</span> ] )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.19">v1.19</small>
+Get the entire contents of a binary file or text file (using <a href="https://www.lua.org/manual/5.1/manual.html#pdf-io.open"><code>io.open</code></a>).
+Returns <strong>nil</strong> and a message on error.</p>
+<div class="paragraph seeAlso">See also: <a href="#writefile">writeFile</a></div>
+<h3 id="removeuselesstokens">removeUselessTokens<a aria-hidden="true" class="anchor" href="#removeuselesstokens"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>removeUselessTokens( tokens )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.6">v1.6</small>
+Remove whitespace and comment tokens.</p>
+<h3 id="run">run<a aria-hidden="true" class="anchor" href="#run"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>returnValue1, <span class="n">...</span> = run( path [, arg1, <span class="n">...</span> ] )
+</code></pre>
+</div>
+<p>Execute a Lua file, optionally sending it extra arguments.
+Similar to <a href="https://www.lua.org/manual/5.1/manual.html#pdf-dofile"><code>dofile</code></a>.</p>
+<pre class="syntax-lua"><code><span class="k">local</span> docs = run(<span class="s">&quot;scripts/downloadDocumentation.lua&quot;</span>, <span class="s">&quot;perl&quot;</span>)
+</code></pre>
+<h3 id="serialize">serialize<a aria-hidden="true" class="anchor" href="#serialize"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>success, error = serialize( buffer, value )
+</code></pre>
+</div>
+<p>Same as <a href="#tolua"><code>toLua</code></a> except adds the result to an array instead of returning the Lua code as a string.
+This could avoid allocating unnecessary strings.</p>
+<pre class="syntax-lua"><code><span class="k">local</span> buffer = {}
+
+table.insert(buffer, <span class="s">&quot;local person = &quot;</span>)
+serialize(buffer, {name=<span class="s">&quot;Barry&quot;</span>, age=<span class="n">49</span>})
+
+<span class="k">local</span> luaString = table.concat(buffer)
+outputLua(luaString)
+<span class="c">-- Output: local person = {age=49,name=&quot;Barry&quot;}
+</span></code></pre>
+<h3 id="sortnatural">sortNatural<a aria-hidden="true" class="anchor" href="#sortnatural"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>sortNatural( array )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.18">v1.18</small>
+Sort an array using <a href="#comparenatural"><code>compareNatural</code></a>.</p>
+<h3 id="tokenize">tokenize<a aria-hidden="true" class="anchor" href="#tokenize"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>tokens = tokenize( luaString [, allowPreprocessorCode=<span class="n">false</span> ] )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.1">v1.1</small>
+Convert Lua code to tokens.
+Returns <strong>nil</strong> and a message on error.
+See <a href="#newtoken"><code>newToken</code></a> for token fields and types.
+Additional token fields:</p>
+<ul>
+<li>
+<code>line</code>: Token start line number.</li>
+<li>
+<code>lineEnd</code>: Token end line number.</li>
+<li>
+<code>position</code>: Starting position in bytes.</li>
+<li>
+<code>file</code>: What file path the token came from.</li>
+</ul>
+<h3 id="tolua">toLua<a aria-hidden="true" class="anchor" href="#tolua"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>luaString = toLua( value )
+</code></pre>
+</div>
+<p>Convert a value to a Lua literal.
+Does not work with certain types, like functions or userdata.
+Returns <strong>nil</strong> and a message on error.</p>
+<pre class="syntax-lua"><code><span class="k">local</span> person    = {name=<span class="s">&quot;Barry&quot;</span>, age=<span class="n">49</span>}
+<span class="k">local</span> luaString = toLua(person)
+outputLua(<span class="s">&quot;local person = &quot;</span>, luaString)
+<span class="c">-- Output: local person = {age=49,name=&quot;Barry&quot;}
+</span></code></pre>
+<h3 id="unpack">unpack<a aria-hidden="true" class="anchor" href="#unpack"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>value1, <span class="n">...</span> = unpack( array [, fromIndex=<span class="n">1</span>, toIndex=#array ] )
+</code></pre>
+</div>
+<p>Is the normal <a href="https://www.lua.org/manual/5.1/manual.html#pdf-unpack"><code>unpack</code></a> in Lua 5.1
+and alias for <a href="https://www.lua.org/manual/5.2/manual.html#pdf-table.unpack"><code>table.unpack</code></a> in Lua 5.2+.</p>
+<h3 id="writefile">writeFile<a aria-hidden="true" class="anchor" href="#writefile"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>success, error = writeFile( path, contents ) <span class="c">-- Writes a binary file.
+</span>success, error = writeFile( path, isTextFile, contents )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.19">v1.19</small>
+Write an entire binary file or text file.</p>
+<div class="paragraph seeAlso">See also: <a href="#readfile">readFile</a></div>
+<h2 id="only-during-processing">Only during processing<a aria-hidden="true" class="anchor" href="#only-during-processing"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h2>
+<h3 id="callmacro">callMacro<a aria-hidden="true" class="anchor" href="#callmacro"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>luaString = callMacro( <span class="k">function</span> , argument1, <span class="n">...</span> )
+luaString = callMacro( macroName, argument1, <span class="n">...</span> )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.21">v1.21</small>
+Call a macro function (which must be a global in <a href="#metaenvironment"><code>metaEnvironment</code></a> if <code>macroName</code> is given).
+The arguments should be Lua code strings.
+Outputted code from the macro is <a href="#startinterceptingoutput">captured</a> and returned.
+Raises an error if no file or string is being processed.</p>
+<div class="paragraph seeAlso">See also: <a href="/luapreprocess/docs/extra-functionality/#insert-func">@insert func()</a></div>
+<h3 id="getcurrentindentationinoutput">getCurrentIndentationInOutput<a aria-hidden="true" class="anchor" href="#getcurrentindentationinoutput"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>string = getCurrentIndentationInOutput( )
+size   = getCurrentIndentationInOutput( tabWidth )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.19">v1.19</small>
+Get the indentation of the current line, either as a string or as a size in spaces.
+Raises an error if no file or string is being processed.</p>
+<pre class="syntax-lua"><code><span class="p"><span class="d">!</span>(
+<span class="k">local</span> fooCode = <span class="s">[[
+local x = 10 * i
+foo(x)]]</span>
+
+<span class="k">function</span> CALL_FOO()
+	<span class="k">local</span> indent = getCurrentIndentationInOutput()
+	<span class="k">return</span> fooCode:gsub(<span class="s">&quot;</span><span class="n">\n</span><span class="s">&quot;</span>, <span class="s">&quot;</span><span class="n">\n</span><span class="s">&quot;</span>..indent) <span class="c">-- Prepend indentation to all lines (except the first).
+</span><span class="k">end</span>
+)</span>
+
+<span class="k">for</span> i = <span class="n">1</span>, <span class="n">3</span> <span class="k">do</span>
+	<span class="k">@@</span><span class="p">CALL_FOO</span>()
+<span class="k">end</span>
+
+<span class="c">-- Output (with correct indentation):
+</span><span class="k">for</span> i = <span class="n">1</span>, <span class="n">3</span> <span class="k">do</span>
+	<span class="k">local</span> x = <span class="n">10</span> * i
+	foo(x)
+<span class="k">end</span>
+</code></pre>
+<h3 id="getcurrentlinenumberinoutput">getCurrentLineNumberInOutput<a aria-hidden="true" class="anchor" href="#getcurrentlinenumberinoutput"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>lineNumber = getCurrentLineNumberInOutput( )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.15">v1.15</small>
+Get the current line number in the output.
+Raises an error if no file or string is being processed.</p>
+<h3 id="getcurrentpathin">getCurrentPathIn<a aria-hidden="true" class="anchor" href="#getcurrentpathin"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>path = getCurrentPathIn( )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.8">v1.8</small>
+Get what file is currently being processed, if any.</p>
+<h3 id="getcurrentpathout">getCurrentPathOut<a aria-hidden="true" class="anchor" href="#getcurrentpathout"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>path = getCurrentPathOut( )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.8">v1.8</small>
+Get what file the currently processed file will be written to, if any.</p>
+<h3 id="getoutputsizesofar">getOutputSizeSoFar<a aria-hidden="true" class="anchor" href="#getoutputsizesofar"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>size = getOutputSizeSoFar( )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.15">v1.15</small>
+Get the amount of bytes outputted so far.
+Raises an error if no file or string is being processed.</p>
+<h3 id="getoutputsofar">getOutputSoFar<a aria-hidden="true" class="anchor" href="#getoutputsofar"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>luaString = getOutputSoFar( [ asTable=<span class="n">false</span> ] )
+getOutputSoFar( buffer ) <span class="c">-- v1.20
+</span></code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.15">v1.15</small>
+Get Lua code that&apos;s been outputted so far.
+Raises an error if no file or string is being processed.</p>
+<ul>
+<li>If <code>asTable</code> is <strong>false</strong> then the full Lua code string is returned.</li>
+<li>If <code>asTable</code> is <strong>true</strong> then an array of Lua code segments is returned. (This avoids allocating, possibly large, strings.)</li>
+<li>
+<small class="tag tag-version" title="Added in version 1.20">v1.20</small> If a <code>buffer</code> array is given then Lua code segments are added to it.</li>
+</ul>
+<h3 id="getoutputsofaronline">getOutputSoFarOnLine<a aria-hidden="true" class="anchor" href="#getoutputsofaronline"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>luaString = getOutputSoFarOnLine( )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.19">v1.19</small>
+Get Lua code that&apos;s been outputted so far on the current line.
+Raises an error if no file or string is being processed.</p>
+<h3 id="loadresource">loadResource<a aria-hidden="true" class="anchor" href="#loadresource"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>luaString = loadResource( name )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.18">v1.18</small>
+Load a Lua file/resource (using the same mechanism as <a href="/luapreprocess/docs/extra-functionality/#insert-name"><code>@insert &quot;name&quot;</code></a>).
+Note that resources are cached after loading once.
+Raises an error if no file or string is being processed.</p>
+<h3 id="outputlua">outputLua<a aria-hidden="true" class="anchor" href="#outputlua"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>outputLua( luaString1, <span class="n">...</span> )
+</code></pre>
+</div>
+<p>Output one or more strings as raw Lua code.
+Raises an error if no file or string is being processed.</p>
+<pre class="syntax-lua"><code><span class="k">local</span> funcName = <span class="s">&quot;doNothing&quot;</span>
+outputLua(<span class="s">&quot;local function &quot;</span>, funcName, <span class="s">&quot;()</span><span class="n">\n</span><span class="s">&quot;</span>)
+outputLua(<span class="s">&quot;end</span><span class="n">\n</span><span class="s">&quot;</span>)
+</code></pre>
+<blockquote>
+<p><strong>Note:</strong> Generated metaprograms will contain calls to <code>__LUA()</code> which is an alias of <code>outputLua()</code>.</p>
+</blockquote>
+<h3 id="outputluatemplate">outputLuaTemplate<a aria-hidden="true" class="anchor" href="#outputluatemplate"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>outputLuaTemplate( luaStringTemplate, value1, <span class="n">...</span> )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.10">v1.10</small>
+Use a string as a template for outputting Lua code with values.
+Question marks (<code>?</code>) are replaced with the values.
+Raises an error if no file or string is being processed.</p>
+<pre class="syntax-lua"><code>outputLuaTemplate(<span class="s">&quot;local name, age = ?, ?&quot;</span>, <span class="s">&quot;Harry&quot;</span>, <span class="n">48</span>)
+outputLuaTemplate(<span class="s">&quot;dogs[?] = ?&quot;</span>, <span class="s">&quot;greyhound&quot;</span>, {italian=<span class="n">false</span>, count=<span class="n">5</span>})
+
+<span class="c">-- Output:
+</span><span class="k">local</span> name, age = <span class="s">&quot;Harry&quot;</span>, <span class="n">48</span>
+dogs[<span class="s">&quot;greyhound&quot;</span>] = {count=<span class="n">5</span>,italian=<span class="n">false</span>}
+</code></pre>
+<h3 id="outputvalue">outputValue<a aria-hidden="true" class="anchor" href="#outputvalue"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>outputValue( value )
+outputValue( value1, value2, <span class="n">...</span> )
+</code></pre>
+</div>
+<p>Output one or more values, like strings or tables, as literals.
+If multiple values are specified then the values will be separated by commas.
+Cannot output functions or userdata.
+Raises an error if no file or string is being processed.</p>
+<pre class="syntax-lua"><code>outputLua(<span class="s">&quot;local person = &quot;</span>)
+outputValue({ name=<span class="s">&quot;Barry&quot;</span>, age=<span class="n">49</span> })
+</code></pre>
+<blockquote>
+<p><strong>Note:</strong> Generated metaprograms will contain calls to <code>__VAL</code> which is an alias of <code>outputValue</code>.</p>
+</blockquote>
+<h3 id="startinterceptingoutput">startInterceptingOutput<a aria-hidden="true" class="anchor" href="#startinterceptingoutput"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>startInterceptingOutput( )
+</code></pre>
+</div>
+<p>Start intercepting output until <a href="#stopinterceptingoutput"><code>stopInterceptingOutput</code></a> is called.
+The function can be called multiple times to intercept interceptions.
+Raises an error if no file or string is being processed.</p>
+<pre class="syntax-lua"><code>startInterceptingOutput()
+
+outputLua(<span class="s">&quot;local dog = &quot;</span>)
+outputValue(<span class="s">&quot;good boy&quot;</span>)
+
+<span class="k">local</span> luaString = stopInterceptingOutput()
+luaString       = luaString:gsub(<span class="s">&quot;dog&quot;</span>, <span class="s">&quot;cat&quot;</span>)
+outputLua(luaString) <span class="c">-- Output: local cat = &quot;good boy&quot;
+</span></code></pre>
+<h3 id="stopinterceptingoutput">stopInterceptingOutput<a aria-hidden="true" class="anchor" href="#stopinterceptingoutput"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>luaString = stopInterceptingOutput( )
+</code></pre>
+</div>
+<p>Stop intercepting output and retrieve collected code.
+See <a href="#startinterceptingoutput"><code>startInterceptingOutput</code></a> for example usage.
+Raises an error if no file or string is being processed.</p>
+<h2 id="macros">Macros<a aria-hidden="true" class="anchor" href="#macros"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h2>
+<h3 id="assert">ASSERT<a aria-hidden="true" class="anchor" href="#assert"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code><span class="k">@@</span><span class="p">ASSERT</span>( condition [, message=auto ] )
+</code></pre>
+</div>
+<p><small class="tag">Macro</small>
+<small class="tag tag-version" title="Added in version 1.17">v1.17</small>
+Does nothing if <a href="#processfile"><code>params.release</code></a> is set, otherwise outputs code that calls <a href="https://www.lua.org/manual/5.1/manual.html#pdf-error"><code>error</code></a> if the condition fails.
+The message argument is only evaluated if the condition fails.</p>
+<pre class="syntax-lua"><code><span class="c">-- In file to be processed:
+</span><span class="k">local</span> name = generateRandomName()
+<span class="k">@@</span><span class="p">ASSERT</span>(name ~= <span class="s">&quot;&quot;</span>)
+<span class="k">@@</span><span class="p">ASSERT</span>(#name &gt; <span class="n">5</span>, <span class="s">&quot;Name is too short: &quot;</span>..name)
+</code></pre>
+<h3 id="log">LOG<a aria-hidden="true" class="anchor" href="#log"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code><span class="k">@@</span><span class="p">LOG</span>( logLevel, value ) <span class="c">-- [1]
+</span><span class="k">@@</span><span class="p">LOG</span>( logLevel, format, value1, <span class="n">...</span> ) <span class="c">-- [2]
+</span></code></pre>
+</div>
+<p><small class="tag">Macro</small>
+<small class="tag tag-version" title="Added in version 1.17">v1.17</small>
+Does nothing if <code>logLevel</code> is lower than <a href="#processfile"><code>params.logLevel</code></a>, otherwise outputs code that prints a value<sup>[1]</sup> or a formatted message<sup>[2]</sup>.</p>
+<p><code>logLevel</code> can be <code>&quot;error&quot;</code>, <code>&quot;warning&quot;</code>, <code>&quot;info&quot;</code>, <code>&quot;debug&quot;</code> or <code>&quot;trace&quot;</code> (from highest to lowest priority).</p>
+<pre class="syntax-lua"><code><span class="c">-- In file to be processed:
+</span><span class="k">local</span> <span class="k">function</span> oldAdd(x, y)
+	<span class="k">@@</span><span class="p">LOG</span>(<span class="s">&quot;warning&quot;</span>, <span class="s">&quot;oldAdd() is deprecated - use newAdd() instead!&quot;</span>)
+	<span class="k">return</span> x + y
+<span class="k">end</span>
+</code></pre>
+<h2 id="exported-stuff-from-the-library">Exported stuff from the library<a aria-hidden="true" class="anchor" href="#exported-stuff-from-the-library"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h2>
+<p>All global functions that are available to metaprograms are also here
+(like <a href="#readFile"><code>readFile</code></a> etc.).</p>
+<h3 id="version">VERSION<a aria-hidden="true" class="anchor" href="#version"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>pp.VERSION
+</code></pre>
+</div>
+<p>The version of LuaPreprocess, e.g. <code>&quot;1.12.0&quot;</code>.</p>
+<h3 id="metaenvironment">metaEnvironment<a aria-hidden="true" class="anchor" href="#metaenvironment"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>pp.metaEnvironment
+</code></pre>
+</div>
+<p>The <a href="https://www.lua.org/manual/5.1/manual.html#2.9">environment</a> used for metaprograms (and the message handler in the command line program).
+The table is a shallow copy of the global environment.</p>
+<pre class="syntax-lua"><code><span class="c">-- Build system context:
+</span>pp.metaEnvironment.theValue = <span class="s">&quot;Hello&quot;</span>
+
+<span class="c">-- Metaprogram context:
+</span><span class="p"><span class="d">!</span>print(theValue) <span class="c">-- Hello
+</span></span></code></pre>
+<h3 id="processfile">processFile<a aria-hidden="true" class="anchor" href="#processfile"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>processedFileInfo = pp.processFile( params )
+</code></pre>
+</div>
+<p>Process a Lua file.
+Returns <strong>nil</strong> and a message on error.</p>
+<ul>
+<li>
+<code>processedFileInfo</code>: Table with various information (see <a href="#processedfileinfo"><code>processedFileInfo</code></a>).</li>
+<li>
+<code>params</code>: Table with the following fields:</li>
+</ul>
+<pre class="syntax-lua"><code>pathIn               = pathToInputFile       <span class="c">-- [Required]
+</span>pathOut              = pathToOutputFile      <span class="c">-- [Required]
+</span>pathMeta             = pathForMetaprogram    <span class="c">-- [Optional] You can inspect this temporary output file if an error occurs in the metaprogram.
+</span>
+debug                = boolean               <span class="c">-- [Optional] Debug mode. The metaprogram file is formatted more nicely and does not get deleted automatically.
+</span>addLineNumbers       = boolean               <span class="c">-- [Optional] Add comments with line numbers to the output.
+</span>
+backtickStrings      = boolean               <span class="c">-- [Optional] Enable the backtick (`) to be used as string literal delimiters. Backtick strings don&apos;t interpret any escape sequences and can&apos;t contain backticks. (Default: false)
+</span>jitSyntax            = boolean               <span class="c">-- [Optional] Allow LuaJIT-specific syntax. (Default: false)
+</span>canOutputNil         = boolean               <span class="c">-- [Optional] Allow !(expression) and outputValue() to output nil. (Default: true)
+</span>fastStrings          = boolean               <span class="c">-- [Optional] Force fast serialization of string values. (Non-ASCII characters will look ugly.) (Default: false)
+</span>validate             = boolean               <span class="c">-- [Optional] Validate output. (Default: true)
+</span>strictMacroArguments = boolean               <span class="c">-- [Optional] Check that macro arguments are valid Lua expressions. (Default: true)
+</span>
+macroPrefix          = prefix                <span class="c">-- [Optional] String to prepend to macro names. (Default: &quot;&quot;)
+</span>macroSuffix          = suffix                <span class="c">-- [Optional] String to append  to macro names. (Default: &quot;&quot;)
+</span>
+release              = boolean               <span class="c">-- [Optional] Enable release mode. Currently only disables the @@ASSERT() macro when true. (Default: false)
+</span>logLevel             = levelName             <span class="c">-- [Optional] Maximum log level for the @@LOG() macro. Can be &quot;off&quot;, &quot;error&quot;, &quot;warning&quot;, &quot;info&quot;, &quot;debug&quot; or &quot;trace&quot;. (Default: &quot;trace&quot;, which enables all logging)
+</span>
+onInsert             = <span class="k">function</span>( name )      <span class="c">-- [Optional] Called for each @insert&quot;name&quot; instruction. It&apos;s expected to return a Lua code string. By default &apos;name&apos; is a path to a file to be inserted.
+</span>onBeforeMeta         = <span class="k">function</span>( luaString ) <span class="c">-- [Optional] Called before the metaprogram runs, if a metaprogram was generated. luaString contains the metaprogram.
+</span>onAfterMeta          = <span class="k">function</span>( luaString ) <span class="c">-- [Optional] Here you can modify and return the Lua code before it&apos;s written to &apos;pathOut&apos;.
+</span>onError              = <span class="k">function</span>( error )     <span class="c">-- [Optional] You can use this to get traceback information. &apos;error&apos; is the same value as what is returned from processFile().
+</span></code></pre>
+<h3 id="processstring">processString<a aria-hidden="true" class="anchor" href="#processstring"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<div class="synopsis">
+<pre class="syntax-lua"><code>luaString, processedFileInfo = pp.processString( params )
+</code></pre>
+</div>
+<p><small class="tag tag-version" title="Added in version 1.2">v1.2</small>
+Process Lua code.
+Returns <strong>nil</strong> and a message on error.</p>
+<ul>
+<li>
+<code>luaString</code>: The processed Lua code.</li>
+<li>
+<code>processedFileInfo</code>: Table with various information (see <a href="#processedfileinfo"><code>processedFileInfo</code></a>).</li>
+<li>
+<code>params</code>: Table with the following fields:</li>
+</ul>
+<pre class="syntax-lua"><code>code                 = luaString             <span class="c">-- [Required]
+</span>pathMeta             = pathForMetaprogram    <span class="c">-- [Optional] You can inspect this temporary output file if an error occurs in the metaprogram.
+</span>
+debug                = boolean               <span class="c">-- [Optional] Debug mode. The metaprogram file is formatted more nicely and does not get deleted automatically.
+</span>addLineNumbers       = boolean               <span class="c">-- [Optional] Add comments with line numbers to the output.
+</span>
+backtickStrings      = boolean               <span class="c">-- [Optional] Enable the backtick (`) to be used as string literal delimiters. Backtick strings don&apos;t interpret any escape sequences and can&apos;t contain backticks. (Default: false)
+</span>jitSyntax            = boolean               <span class="c">-- [Optional] Allow LuaJIT-specific syntax. (Default: false)
+</span>canOutputNil         = boolean               <span class="c">-- [Optional] Allow !(expression) and outputValue() to output nil. (Default: true)
+</span>fastStrings          = boolean               <span class="c">-- [Optional] Force fast serialization of string values. (Non-ASCII characters will look ugly.) (Default: false)
+</span>validate             = boolean               <span class="c">-- [Optional] Validate output. (Default: true)
+</span>strictMacroArguments = boolean               <span class="c">-- [Optional] Check that macro arguments are valid Lua expressions. (Default: true)
+</span>
+macroPrefix          = prefix                <span class="c">-- [Optional] String to prepend to macro names. (Default: &quot;&quot;)
+</span>macroSuffix          = suffix                <span class="c">-- [Optional] String to append  to macro names. (Default: &quot;&quot;)
+</span>
+release              = boolean               <span class="c">-- [Optional] Enable release mode. Currently only disables the @@ASSERT() macro when true. (Default: false)
+</span>logLevel             = levelName             <span class="c">-- [Optional] Maximum log level for the @@LOG() macro. Can be &quot;off&quot;, &quot;error&quot;, &quot;warning&quot;, &quot;info&quot;, &quot;debug&quot; or &quot;trace&quot;. (Default: &quot;trace&quot;, which enables all logging)
+</span>
+onInsert             = <span class="k">function</span>( name )      <span class="c">-- [Optional] Called for each @insert&quot;name&quot; instruction. It&apos;s expected to return a Lua code string. By default &apos;name&apos; is a path to a file to be inserted.
+</span>onBeforeMeta         = <span class="k">function</span>( luaString ) <span class="c">-- [Optional] Called before the metaprogram runs, if a metaprogram was generated. luaString contains the metaprogram.
+</span>onError              = <span class="k">function</span>( error )     <span class="c">-- [Optional] You can use this to get traceback information. &apos;error&apos; is the same value as the second returned value from processString().
+</span></code></pre>
+<h2 id="other-info">Other info<a aria-hidden="true" class="anchor" href="#other-info"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h2>
+<h3 id="processedfileinfo">processedFileInfo<a aria-hidden="true" class="anchor" href="#processedfileinfo"><svg height="16" viewBox="0 0 16 16" width="16"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z" fill-rule="evenodd"/></svg></a></h3>
+<p>Table returned from <a href="#processfile"><code>processFile</code></a> and <a href="#processstring"><code>processString</code></a>
+(and sent to the <a href="/luapreprocess/docs/command-line/#filedone"><code>&quot;filedone&quot;</code></a> message handler in the command line program).
+Contains these fields:</p>
+<ul>
+<li>
+<code>path</code>: Path to the processed file. (Empty if <a href="#processstring"><code>processString</code></a> was used.)</li>
+<li>
+<code>outputPath</code>: <small class="tag tag-version" title="Added in version 1.9">v1.9</small> Path to the outputted file. (Empty if <a href="#processstring"><code>processString</code></a> was used.)</li>
+<li>
+<code>processedByteCount</code>: The length of the processed data in bytes.</li>
+<li>
+<code>lineCount</code>: Total line count.</li>
+<li>
+<code>linesOfCode</code>: <small class="tag tag-version" title="Added in version 1.3">v1.3</small> Amount of lines with code.</li>
+<li>
+<code>tokenCount</code>: Total token count.</li>
+<li>
+<code>hasPreprocessorCode</code>: Whether any preprocessor code was encountered. If this is <strong>false</strong> then the file is 100% pure Lua.</li>
+<li>
+<code>hasMetaprogram</code>: <small class="tag tag-version" title="Added in version 1.13">v1.13</small> Whether any preprocessor code that triggered code execution was encountered.</li>
+<li>
+<code>insertedFiles</code>: <small class="tag tag-version" title="Added in version 1.10">v1.10</small> Array of names to resources inserted by <a href="/luapreprocess/docs/extra-functionality/#insert-name"><code>@insert &quot;name&quot;</code></a> instructions.</li>
+</ul>
+
+	<p style="margin-top: 4rem;">
+		<small>Page updated: 2022-07-08</small>
+	</p>
+</main>
+
+		</div></div>
+
+		<footer>Copyright © 2009-2022 <a href="http://marcus.refreezed.com/">Marcus &apos;ReFreezed&apos; Thunström</a></footer>
+	</body>
+</html>
